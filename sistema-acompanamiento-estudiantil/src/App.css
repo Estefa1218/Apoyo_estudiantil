@@ -1,0 +1,222 @@
+/* src/App.css */
+
+.app-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f8ff;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #1e3a8a;
+}
+
+.header h1 {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.header p {
+  color: #4b5563;
+  font-size: 1rem;
+  margin-top: 5px;
+}
+
+.main-content {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card h2 {
+  font-size: 1.5rem;
+  color: #1e3a8a;
+  margin-top: 0;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card .description {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.drop-zone {
+  border: 2px dashed #3b82f6;
+  border-radius: 12px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #ebf5ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.drop-zone:hover {
+  background-color: #dbeafe;
+  border-color: #2563eb;
+}
+
+.drop-zone svg {
+  color: #3b82f6;
+  margin-bottom: 10px;
+}
+
+.drop-zone p {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 0.9rem;
+}
+
+.drop-zone .or {
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin: 8px 0;
+}
+
+.file-input-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.file-input-btn:hover {
+  background-color: #2563eb;
+}
+
+.file-input-btn input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-name {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.upload-btn {
+  width: 100%;
+  background-color: #6b7280;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.upload-btn:hover {
+  background-color: #4b5563;
+}
+
+.upload-btn:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #10b981;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.download-btn:hover {
+  background-color: #059669;
+}
+
+.loading-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-top: 20px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 10px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .drop-zone {
+    padding: 20px 10px;
+  }
+}
