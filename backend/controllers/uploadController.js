@@ -1,5 +1,7 @@
 // backend/controllers/uploadController.js
 const XLSX = require('xlsx');
+const fs = require('fs');
+const path = require('path');
 const db = require('../config/db');
 
 const handleUpload = async (req, res) => {
@@ -68,11 +70,33 @@ const handleUpload = async (req, res) => {
       );
     }
 
+    // === GENERAR ARCHIVO PROCESADO (si es necesario) ===
+    // Crear directorio uploads si no existe
+    const uploadDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    // Crear un nuevo libro de trabajo para el archivo procesado
+    const processedWorkbook = XLSX.utils.book_new();
+    const processedWorksheet = XLSX.utils.json_to_sheet(students);
+    XLSX.utils.book_append_sheet(processedWorkbook, processedWorksheet, 'Estudiantes Procesados');
+    
+    // Generar el nombre del archivo procesado
+    const originalFileName = path.parse(req.file.originalname).name;
+    const processedFileName = `${originalFileName}_procesado.xlsx`;
+    const processedFilePath = path.join(uploadDir, processedFileName);
+    
+    // Escribir el archivo procesado
+    XLSX.writeFile(processedWorkbook, processedFilePath);
+
     // === RESPUESTA ===
     res.status(200).json({
       message: 'Archivo procesado exitosamente',
       cargaId: cargaId,
-      totalEstudiantes: students.length
+      totalEstudiantes: students.length,
+      processedData: students,  // Devolver los datos procesados si se necesitan en el frontend
+      processedFileName: processedFileName // Nombre del archivo procesado para descarga
     });
 
   } catch (error) {
@@ -81,4 +105,34 @@ const handleUpload = async (req, res) => {
   }
 };
 
-module.exports = { handleUpload };
+// Función para descargar archivo procesado
+const handleDownload = async (req, res) => {
+  try {
+    const { fileName } = req.params;
+    
+    // Verificar que el nombre de archivo sea seguro
+    if (!fileName || fileName.includes('..') || fileName.includes('/')) {
+      return res.status(400).json({ error: 'Nombre de archivo inválido' });
+    }
+    
+    const filePath = path.join(__dirname, '../uploads', fileName);
+    
+    // Verificar que el archivo exista
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Archivo no encontrado' });
+    }
+    
+    // Enviar el archivo como descarga
+    res.download(filePath, fileName, (err) => {
+      if (err) {
+        console.error('Error enviando archivo:', err);
+        res.status(500).json({ error: 'Error al enviar el archivo' });
+      }
+    });
+  } catch (error) {
+    console.error('Error en handleDownload:', error);
+    res.status(500).json({ error: 'Error al descargar el archivo' });
+  }
+};
+
+module.exports = { handleUpload, handleDownload };
