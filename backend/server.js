@@ -1,24 +1,24 @@
 // backend/server.js
-const express = require('express');
-const cors = require('cors');
-const uploadRoutes = require('./routes/upload');
-require('dotenv').config();
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+
+import authRoutes from "./routes/auth.js";
+import uploadRoutes from "./routes/upload.js";
+
+dotenv.config();
 
 const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+app.use("/api", uploadRoutes); 
+
 const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(cors()); // permite peticiones desde React (localhost:3000)
-app.use(express.json({ limit: '10mb' }));
-
-// Rutas
-app.use('/api', uploadRoutes);
-
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.send('Backend de Acompañamiento Estudiantil funcionando ✅');
-});
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
+
