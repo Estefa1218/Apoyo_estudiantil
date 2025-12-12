@@ -26,13 +26,13 @@ function Login({ onLogin }) {
       const response = await fetch("https://apoyoestudiantilibero1234.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user, password: pass }),
+        body: JSON.stringify({ email: user, pass }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Credenciales incorrectas");
+        alert(data.error || "Credenciales incorrectas");
         return;
       }
 
@@ -47,12 +47,12 @@ function Login({ onLogin }) {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+  
     if (!nameR || !emailR || !passR) {
       alert("Todos los campos son obligatorios");
       return;
     }
-
+  
     try {
       const response = await fetch("https://apoyoestudiantilibero1234.onrender.com/api/auth/register", {
         method: "POST",
@@ -61,23 +61,24 @@ function Login({ onLogin }) {
           nombre: nameR,
           email: emailR,
           password: passR,
+          rol: "estudiante",
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
-        alert(data.message || "Error al registrar usuario");
+        alert(data.error || "Error al registrar usuario");
         return;
       }
-
+  
       alert("Usuario registrado con éxito");
-
+  
       setNameR("");
       setEmailR("");
       setPassR("");
       setIsRegister(false);
-
+  
     } catch (error) {
       alert("Error en la conexión con el servidor");
       console.error(error);
