@@ -1,6 +1,8 @@
-// backend/config/db.js
-const mysql = require('mysql2');
-require('dotenv').config();
+// config/db.js
+import mysql from "mysql2";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -12,4 +14,5 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-module.exports = pool.promise();
+export default pool.promise();
+

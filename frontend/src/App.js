@@ -1,6 +1,9 @@
 // src/App.js
 import React, { useState } from 'react';
 import './App.css';
+/*login*/
+import Login from "./login";
+/*hasta aqui*/ 
 
 function App() {
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -8,6 +11,13 @@ function App() {
   const [fileName, setFileName] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState('');
+
+  /*login*/
+  const [isLogged, setIsLogged] = useState(false);
+  if (!isLogged) {
+    return <Login onLogin={() => setIsLogged(true)} />;
+  /*hasta aqui*/ 
+  }
 
   const handleFileSelect = (file) => {
     if (file && file.name.endsWith('.xlsx')) {
@@ -151,5 +161,8 @@ function App() {
     </div>
   );
 }
+
+
+
 
 export default App;

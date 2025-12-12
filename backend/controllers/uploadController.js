@@ -1,84 +1,96 @@
 // backend/controllers/uploadController.js
-const XLSX = require('xlsx');
-const db = require('../config/db');
+import XLSX from "xlsx";
+import pool from "../config/db.js";
 
-const handleUpload = async (req, res) => {
+export const handleUpload = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No se subió ningún archivo' });
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ error: "No se subió ningún archivo .xlsx" });
     }
 
-    // Leer el buffer del archivo Excel
-    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    // Leer XLSX
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-    // Validar que la primera fila tenga los encabezados esperados
+    // Validar encabezados
     const headers = jsonData[0] || [];
-    const expectedHeaders = ['nombre', 'correo', 'dias_ausente']; // en minúsculas para comparar
+    const expected = ["nombre", "correo", "dias_ausente"];
+    const normalized = headers.map(h => (h || "").toString().toLowerCase().trim());
 
-    const normalizedHeaders = headers.map(h => h.toLowerCase().trim());
-    if (!expectedHeaders.every(h => normalizedHeaders.includes(h))) {
+    if (!expected.every(h => normalized.includes(h))) {
       return res.status(400).json({
-        error: 'El archivo debe contener las columnas: nombre, correo, dias_ausente'
+        error: "El archivo debe contener: nombre, correo, dias_ausente"
       });
     }
 
-    // Encontrar índices de las columnas
-    const nameIndex = normalizedHeaders.findIndex(h => h === 'nombre');
-    const emailIndex = normalizedHeaders.findIndex(h => h === 'correo');
-    const daysIndex = normalizedHeaders.findIndex(h => h === 'dias_ausente');
+    // Identificar índices
+    const iName = normalized.indexOf("nombre");
+    const iCorreo = normalized.indexOf("correo");
+    const iDias = normalized.indexOf("dias_ausente");
 
-    // Extraer datos (omitir la primera fila)
     const students = [];
+
     for (let i = 1; i < jsonData.length; i++) {
       const row = jsonData[i];
-      if (row.length === 0) continue; // saltar filas vacías
+      if (!row) continue;
 
-      const name = row[nameIndex]?.toString().trim();
-      const email = row[emailIndex]?.toString().trim();
-      const days = parseInt(row[daysIndex]);
+      const name = row[iName]?.toString().trim();
+      const correo = row[iCorreo]?.toString().trim();
+      const dias = parseInt(row[iDias], 10);
 
-      if (name && email && !isNaN(days)) {
-        students.push({ name, email, days });
+      if (name && correo && !isNaN(dias)) {
+        students.push({ name, correo, dias });
       }
     }
 
     if (students.length === 0) {
-      return res.status(400).json({ error: 'No se encontraron datos válidos en el archivo' });
+      return res.status(400).json({ error: "Archivo vacío o sin datos válidos" });
     }
 
-    // === GUARDAR EN BASE DE DATOS ===
+    // Guardar en DB
+    const conn = await pool.getConnection();
 
-    // 1. Insertar en Carga_Masiva
-    const [cargaResult] = await db.execute(
-      'INSERT INTO Carga_Masiva (nombre_archivo, total_estudiantes, profesional_id) VALUES (?, ?, ?)',
-      [req.file.originalname, students.length, 1] // profesional_id = 1 por ahora (puedes cambiarlo)
-    );
-    const cargaId = cargaResult.insertId;
+    try {
+      await conn.beginTransaction();
 
-    // 2. Insertar cada estudiante en Estudiante_Carga
-    for (const student of students) {
-      await db.execute(
-        `INSERT INTO Estudiante_Carga 
-        (nombre_completo, email, dias_ausente, carga_id, fecha_primer_intento) 
-        VALUES (?, ?, ?, ?, CURDATE())`,
-        [student.name, student.email, student.days, cargaId]
+      const [carga] = await conn.query(
+        "INSERT INTO Carga_Masiva (nombre_archivo, total_estudiantes, profesional_id) VALUES (?, ?, ?)",
+        [req.file.originalname, students.length, 1]
       );
-    }
 
-    // === RESPUESTA ===
-    res.status(200).json({
-      message: 'Archivo procesado exitosamente',
-      cargaId: cargaId,
-      totalEstudiantes: students.length
-    });
+      const cargaId = carga.insertId;
+
+      const inserts = students.map(s =>
+        conn.query(
+          `INSERT INTO Estudiante_Carga 
+            (nombre_completo, email, dias_ausente, carga_id, fecha_primer_intento)
+            VALUES (?, ?, ?, ?, CURDATE())`,
+          [s.name, s.correo, s.dias, cargaId]
+        )
+      );
+
+      await Promise.all(inserts);
+
+      await conn.commit();
+
+      return res.json({
+        message: "Archivo cargado correctamente",
+        cargaId,
+        totalEstudiantes: students.length
+      });
+
+    } catch (err) {
+      await conn.rollback();
+      console.error(err);
+      return res.status(500).json({ error: "Error al guardar en la base de datos" });
+    } finally {
+      conn.release();
+    }
 
   } catch (error) {
-    console.error('Error en handleUpload:', error);
-    res.status(500).json({ error: 'Error al procesar el archivo' });
+    console.error(error);
+    return res.status(500).json({ error: "Error procesando el archivo" });
   }
 };
-
-module.exports = { handleUpload };

@@ -1,0 +1,113 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f2f2f2;
+}
+
+.wrapper {
+    position: relative;
+    width: 480px;
+    min-height: 520px;
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.8);
+    border-radius: 20px;
+    backdrop-filter: blur(25px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, .4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.boxLogin{
+    width: 100%;
+    padding: 40px;
+}
+
+.boxLogin h2{
+    font-size: 2.2em;
+    color: #1e3a8a;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.inputBox {
+    position: relative;
+    width: 100%;
+    height: 45px;
+    border-bottom: 2px solid black;
+    margin: 35px 0;
+}
+
+.inputBox label{
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 15px;
+    color: #1e3a8a;
+    pointer-events: none;
+    transition: .3s ease;
+}
+
+.inputBox input{
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    color: #000;
+    padding: 0 40px 0 5px;
+}
+
+.inputBox input:focus ~ label,
+.inputBox input:not(:placeholder-shown) ~ label{
+    top: -6px;
+    font-size: 13px;
+}
+
+.recordarContraseña{
+    margin-top: -10px;
+    font-size: 15px;
+    color: #1e3a8a;
+}
+
+#boton {
+    width: 100%;
+    height: 45px;
+    background: #1e3a8a;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.registrar{
+    margin-top: 20px;
+    text-align: center;
+    font-size: 15px;
+    color: black;
+}
+
+.registrar p a{
+    color: red;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.registrar p a:hover{
+    text-decoration: underline;
+}
