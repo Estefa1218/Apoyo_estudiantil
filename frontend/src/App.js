@@ -40,7 +40,7 @@ function App() {
     setUploadMessage('Subiendo archivo...');
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch('https://apoyoestudiantilibero1234.onrender.com/api/upload', {
         method: 'POST',
         body: formData,
       });
