@@ -38,8 +38,10 @@ type Resource = {
 };
 
 export function AbsenceManagementPage() {
-  const [activeTab, setActiveTab] = useState<'taxonomies' | 'categories' | 'actions' | 'resources'>('taxonomies');
-  
+  const [activeTab, setActiveTab] = useState<'taxonomies' | 'categories' | 'actions' | 'resources'>(
+    'taxonomies'
+  );
+
   // Estado para taxonomías
   const [taxonomies, setTaxonomies] = useState<Taxonomy[]>([]);
   const [newTaxonomy, setNewTaxonomy] = useState('');
@@ -121,17 +123,19 @@ export function AbsenceManagementPage() {
   };
 
   const deleteTaxonomy = (id: string) => {
-    if (confirm('¿Estás seguro de eliminar esta taxonomía? Se eliminarán también todas sus categorías y acciones asociadas.')) {
-      setTaxonomies(taxonomies.filter(t => t.id !== id));
-      setCategories(categories.filter(c => c.taxonomyId !== id));
-      setActions(actions.filter(a => a.taxonomyId !== id));
+    if (
+      confirm(
+        '¿Estás seguro de eliminar esta taxonomía? Se eliminarán también todas sus categorías y acciones asociadas.'
+      )
+    ) {
+      setTaxonomies(taxonomies.filter((t) => t.id !== id));
+      setCategories(categories.filter((c) => c.taxonomyId !== id));
+      setActions(actions.filter((a) => a.taxonomyId !== id));
     }
   };
 
   const updateTaxonomy = (id: string) => {
-    setTaxonomies(taxonomies.map(t => 
-      t.id === id ? { ...t, name: editTaxonomyName } : t
-    ));
+    setTaxonomies(taxonomies.map((t) => (t.id === id ? { ...t, name: editTaxonomyName } : t)));
     setEditingTaxonomy(null);
     setEditTaxonomyName('');
   };
@@ -158,14 +162,12 @@ export function AbsenceManagementPage() {
 
   const deleteCategory = (id: string) => {
     if (confirm('¿Estás seguro de eliminar esta categoría?')) {
-      setCategories(categories.filter(c => c.id !== id));
+      setCategories(categories.filter((c) => c.id !== id));
     }
   };
 
   const updateCategory = (id: string, updates: Partial<Category>) => {
-    setCategories(categories.map(c => 
-      c.id === id ? { ...c, ...updates } : c
-    ));
+    setCategories(categories.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   };
 
   // Funciones para acciones
@@ -189,16 +191,18 @@ export function AbsenceManagementPage() {
   };
 
   const deleteAction = (id: string) => {
-    if (confirm('¿Estás seguro de eliminar esta acción? Se eliminarán también todos sus recursos asociados.')) {
-      setActions(actions.filter(a => a.id !== id));
-      setResources(resources.filter(r => r.actionId !== id));
+    if (
+      confirm(
+        '¿Estás seguro de eliminar esta acción? Se eliminarán también todos sus recursos asociados.'
+      )
+    ) {
+      setActions(actions.filter((a) => a.id !== id));
+      setResources(resources.filter((r) => r.actionId !== id));
     }
   };
 
   const updateAction = (id: string, updates: Partial<Action>) => {
-    setActions(actions.map(a => 
-      a.id === id ? { ...a, ...updates } : a
-    ));
+    setActions(actions.map((a) => (a.id === id ? { ...a, ...updates } : a)));
   };
 
   // Funciones para recursos
@@ -225,14 +229,12 @@ export function AbsenceManagementPage() {
 
   const deleteResource = (id: string) => {
     if (confirm('¿Estás seguro de eliminar este recurso?')) {
-      setResources(resources.filter(r => r.id !== id));
+      setResources(resources.filter((r) => r.id !== id));
     }
   };
 
   const updateResource = (id: string, updates: Partial<Resource>) => {
-    setResources(resources.map(r => 
-      r.id === id ? { ...r, ...updates } : r
-    ));
+    setResources(resources.map((r) => (r.id === id ? { ...r, ...updates } : r)));
   };
 
   return (
@@ -300,7 +302,8 @@ export function AbsenceManagementPage() {
               <CardHeader>
                 <CardTitle>Agregar Nueva Taxonomía</CardTitle>
                 <CardDescription>
-                  Las taxonomías son los tipos principales de ausentismos (ej: Salud, Familiar, Académico)
+                  Las taxonomías son los tipos principales de ausentismos (ej: Salud, Familiar,
+                  Académico)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -342,10 +345,7 @@ export function AbsenceManagementPage() {
                               onChange={(e) => setEditTaxonomyName(e.target.value)}
                               onKeyPress={(e) => e.key === 'Enter' && updateTaxonomy(taxonomy.id)}
                             />
-                            <Button
-                              size="sm"
-                              onClick={() => updateTaxonomy(taxonomy.id)}
-                            >
+                            <Button size="sm" onClick={() => updateTaxonomy(taxonomy.id)}>
                               <Save className="w-4 h-4" />
                             </Button>
                             <Button
@@ -402,7 +402,8 @@ export function AbsenceManagementPage() {
               <CardHeader>
                 <CardTitle>Agregar Nueva Categoría</CardTitle>
                 <CardDescription>
-                  Crea categorías específicas para cada taxonomía con su descripción y si requiere derivación
+                  Crea categorías específicas para cada taxonomía con su descripción y si requiere
+                  derivación
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -412,7 +413,9 @@ export function AbsenceManagementPage() {
                     <select
                       className="w-full rounded-md border border-gray-300 p-2"
                       value={newCategory.taxonomyId}
-                      onChange={(e) => setNewCategory({ ...newCategory, taxonomyId: e.target.value })}
+                      onChange={(e) =>
+                        setNewCategory({ ...newCategory, taxonomyId: e.target.value })
+                      }
                     >
                       <option value="">Selecciona una taxonomía</option>
                       {taxonomies.map((tax) => (
@@ -436,7 +439,9 @@ export function AbsenceManagementPage() {
                       className="w-full rounded-md border border-gray-300 p-2 min-h-[80px]"
                       placeholder="Describe cuándo aplicar esta categoría..."
                       value={newCategory.description}
-                      onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                      onChange={(e) =>
+                        setNewCategory({ ...newCategory, description: e.target.value })
+                      }
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -444,13 +449,18 @@ export function AbsenceManagementPage() {
                       type="checkbox"
                       id="requiresProfessional"
                       checked={newCategory.requiresProfessional}
-                      onChange={(e) => setNewCategory({ ...newCategory, requiresProfessional: e.target.checked })}
+                      onChange={(e) =>
+                        setNewCategory({ ...newCategory, requiresProfessional: e.target.checked })
+                      }
                     />
                     <Label htmlFor="requiresProfessional">
                       Requiere derivación a profesional de bienestar
                     </Label>
                   </div>
-                  <Button onClick={addCategory} disabled={!newCategory.name || !newCategory.taxonomyId}>
+                  <Button
+                    onClick={addCategory}
+                    disabled={!newCategory.name || !newCategory.taxonomyId}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Categoría
                   </Button>
@@ -470,9 +480,11 @@ export function AbsenceManagementPage() {
                 ) : (
                   <div className="space-y-3">
                     {taxonomies.map((taxonomy) => {
-                      const taxonomyCategories = categories.filter(c => c.taxonomyId === taxonomy.id);
+                      const taxonomyCategories = categories.filter(
+                        (c) => c.taxonomyId === taxonomy.id
+                      );
                       if (taxonomyCategories.length === 0) return null;
-                      
+
                       return (
                         <div key={taxonomy.id}>
                           <h3 className="font-medium mb-2" style={{ color: '#2563EB' }}>
@@ -566,7 +578,9 @@ export function AbsenceManagementPage() {
                       type="checkbox"
                       id="autoSendToProfessional"
                       checked={newAction.autoSendToProfessional}
-                      onChange={(e) => setNewAction({ ...newAction, autoSendToProfessional: e.target.checked })}
+                      onChange={(e) =>
+                        setNewAction({ ...newAction, autoSendToProfessional: e.target.checked })
+                      }
                     />
                     <Label htmlFor="autoSendToProfessional">
                       Enviar automáticamente a profesional de bienestar
@@ -592,9 +606,9 @@ export function AbsenceManagementPage() {
                 ) : (
                   <div className="space-y-3">
                     {taxonomies.map((taxonomy) => {
-                      const taxonomyActions = actions.filter(a => a.taxonomyId === taxonomy.id);
+                      const taxonomyActions = actions.filter((a) => a.taxonomyId === taxonomy.id);
                       if (taxonomyActions.length === 0) return null;
-                      
+
                       return (
                         <div key={taxonomy.id}>
                           <h3 className="font-medium mb-2" style={{ color: '#2563EB' }}>
@@ -660,7 +674,7 @@ export function AbsenceManagementPage() {
                     >
                       <option value="">Selecciona una acción</option>
                       {actions.map((action) => {
-                        const taxonomy = taxonomies.find(t => t.id === action.taxonomyId);
+                        const taxonomy = taxonomies.find((t) => t.id === action.taxonomyId);
                         return (
                           <option key={action.id} value={action.id}>
                             {taxonomy?.name} - {action.name}
@@ -682,7 +696,9 @@ export function AbsenceManagementPage() {
                     <select
                       className="w-full rounded-md border border-gray-300 p-2"
                       value={newResource.type}
-                      onChange={(e) => setNewResource({ ...newResource, type: e.target.value as Resource['type'] })}
+                      onChange={(e) =>
+                        setNewResource({ ...newResource, type: e.target.value as Resource['type'] })
+                      }
                     >
                       <option value="document">Documento</option>
                       <option value="pdf">PDF</option>
@@ -703,11 +719,13 @@ export function AbsenceManagementPage() {
                       className="w-full rounded-md border border-gray-300 p-2 min-h-[80px]"
                       placeholder="Describe brevemente el contenido del recurso..."
                       value={newResource.description}
-                      onChange={(e) => setNewResource({ ...newResource, description: e.target.value })}
+                      onChange={(e) =>
+                        setNewResource({ ...newResource, description: e.target.value })
+                      }
                     />
                   </div>
-                  <Button 
-                    onClick={addResource} 
+                  <Button
+                    onClick={addResource}
                     disabled={!newResource.name || !newResource.actionId || !newResource.url}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -729,11 +747,11 @@ export function AbsenceManagementPage() {
                 ) : (
                   <div className="space-y-3">
                     {actions.map((action) => {
-                      const actionResources = resources.filter(r => r.actionId === action.id);
+                      const actionResources = resources.filter((r) => r.actionId === action.id);
                       if (actionResources.length === 0) return null;
-                      
-                      const taxonomy = taxonomies.find(t => t.id === action.taxonomyId);
-                      
+
+                      const taxonomy = taxonomies.find((t) => t.id === action.taxonomyId);
+
                       return (
                         <div key={action.id}>
                           <h3 className="font-medium mb-2" style={{ color: '#2563EB' }}>
