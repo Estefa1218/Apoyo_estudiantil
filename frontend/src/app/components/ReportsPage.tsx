@@ -5,17 +5,24 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Calendar as CalendarComponent } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { 
-  Upload, 
-  CheckCircle, 
-  AlertCircle, 
-  Hourglass, 
-  Calendar, 
+import {
+  Upload,
+  CheckCircle,
+  AlertCircle,
+  Hourglass,
+  Calendar,
   Loader2,
-  Download 
+  Download,
 } from 'lucide-react';
 
-type AppState = 'empty' | 'uploading' | 'processing' | 'ready' | 'upload-error' | 'date-error' | 'download-error';
+type AppState =
+  | 'empty'
+  | 'uploading'
+  | 'processing'
+  | 'ready'
+  | 'upload-error'
+  | 'date-error'
+  | 'download-error';
 
 export function ReportsPage() {
   const [state, setState] = useState<AppState>('empty');
@@ -54,7 +61,7 @@ export function ReportsPage() {
     if (startDate && endDate) {
       const startDateObj = parseStringToDate(startDate);
       const endDateObj = parseStringToDate(endDate);
-      
+
       if (startDateObj && endDateObj && startDateObj <= endDateObj) {
         const diffTime = Math.abs(endDateObj.getTime() - startDateObj.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -96,7 +103,7 @@ export function ReportsPage() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       handleFileUpload(files[0]);
@@ -113,28 +120,34 @@ export function ReportsPage() {
   const handleFileUpload = (file: File) => {
     // Simular validación de archivo
     const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
-    
+
     if (!isExcel) {
-      setUploadErrorMessage('El formato del archivo es incorrecto. Asegúrate de usar un archivo .xlsx o .xls');
+      setUploadErrorMessage(
+        'El formato del archivo es incorrecto. Asegúrate de usar un archivo .xlsx o .xls'
+      );
       setState('upload-error');
       return;
     }
 
     // Simular diferentes tipos de errores (70% éxito, 30% error)
     const random = Math.random();
-    
+
     if (random > 0.7) {
       // Simular diferentes tipos de errores
       const errorType = Math.floor(Math.random() * 3);
-      
+
       if (errorType === 0) {
-        setUploadErrorMessage('Faltan columnas obligatorias en el archivo. Por favor, verifica la plantilla.');
+        setUploadErrorMessage(
+          'Faltan columnas obligatorias en el archivo. Por favor, verifica la plantilla.'
+        );
       } else if (errorType === 1) {
-        setUploadErrorMessage('El archivo está corrupto o no se puede leer. Intenta con otro archivo.');
+        setUploadErrorMessage(
+          'El archivo está corrupto o no se puede leer. Intenta con otro archivo.'
+        );
       } else {
         setUploadErrorMessage('Error de conexión al servidor. Por favor, intenta nuevamente.');
       }
-      
+
       setState('upload-error');
     } else {
       setUploadErrorMessage('');
@@ -190,9 +203,11 @@ export function ReportsPage() {
     if (validateDateRange(startDate, endDate)) {
       // Simular fallo en descarga (20% de probabilidad)
       const downloadFails = Math.random() > 0.8;
-      
+
       if (downloadFails) {
-        setDateError('Error al generar el reporte. El servidor no responde. Por favor, intenta nuevamente en unos minutos.');
+        setDateError(
+          'Error al generar el reporte. El servidor no responde. Por favor, intenta nuevamente en unos minutos.'
+        );
         setState('download-error');
       } else {
         // Simular descarga exitosa
@@ -243,25 +258,27 @@ export function ReportsPage() {
                           const value = e.target.value;
                           setStartDate(value);
                           setDateError('');
-                          if (state === 'date-error' || state === 'download-error') setState('ready');
+                          if (state === 'date-error' || state === 'download-error')
+                            setState('ready');
                           const parsedDate = parseStringToDate(value);
                           if (parsedDate) {
                             setStartDateValue(parsedDate);
                           }
                         }}
-                        disabled={state !== 'ready' && state !== 'date-error' && state !== 'download-error'}
+                        disabled={
+                          state !== 'ready' && state !== 'date-error' && state !== 'download-error'
+                        }
                         className={dateError ? 'border-red-500' : ''}
                       />
                       <button
                         type="button"
                         onClick={() => setStartDateOpen(!startDateOpen)}
-                        disabled={state !== 'ready' && state !== 'date-error' && state !== 'download-error'}
+                        disabled={
+                          state !== 'ready' && state !== 'date-error' && state !== 'download-error'
+                        }
                         className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50"
                       >
-                        <Calendar 
-                          className="w-5 h-5" 
-                          style={{ color: '#64748B' }} 
-                        />
+                        <Calendar className="w-5 h-5" style={{ color: '#64748B' }} />
                       </button>
                     </div>
                   </PopoverTrigger>
@@ -275,7 +292,8 @@ export function ReportsPage() {
                           setStartDate(formatDateToString(date));
                           setStartDateOpen(false);
                           setDateError('');
-                          if (state === 'date-error' || state === 'download-error') setState('ready');
+                          if (state === 'date-error' || state === 'download-error')
+                            setState('ready');
                         }
                       }}
                       disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
@@ -284,7 +302,7 @@ export function ReportsPage() {
                   </PopoverContent>
                 </Popover>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="end-date">Fecha de Fin</Label>
                 <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
@@ -299,25 +317,27 @@ export function ReportsPage() {
                           const value = e.target.value;
                           setEndDate(value);
                           setDateError('');
-                          if (state === 'date-error' || state === 'download-error') setState('ready');
+                          if (state === 'date-error' || state === 'download-error')
+                            setState('ready');
                           const parsedDate = parseStringToDate(value);
                           if (parsedDate) {
                             setEndDateValue(parsedDate);
                           }
                         }}
-                        disabled={state !== 'ready' && state !== 'date-error' && state !== 'download-error'}
+                        disabled={
+                          state !== 'ready' && state !== 'date-error' && state !== 'download-error'
+                        }
                         className={dateError ? 'border-red-500' : ''}
                       />
                       <button
                         type="button"
                         onClick={() => setEndDateOpen(!endDateOpen)}
-                        disabled={state !== 'ready' && state !== 'date-error' && state !== 'download-error'}
+                        disabled={
+                          state !== 'ready' && state !== 'date-error' && state !== 'download-error'
+                        }
                         className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50"
                       >
-                        <Calendar 
-                          className="w-5 h-5" 
-                          style={{ color: '#64748B' }} 
-                        />
+                        <Calendar className="w-5 h-5" style={{ color: '#64748B' }} />
                       </button>
                     </div>
                   </PopoverTrigger>
@@ -331,7 +351,8 @@ export function ReportsPage() {
                           setEndDate(formatDateToString(date));
                           setEndDateOpen(false);
                           setDateError('');
-                          if (state === 'date-error' || state === 'download-error') setState('ready');
+                          if (state === 'date-error' || state === 'download-error')
+                            setState('ready');
                         }
                       }}
                       disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
@@ -343,13 +364,12 @@ export function ReportsPage() {
             </div>
 
             {dateError ? (
-              <p className="text-red-600">
-                {dateError}
-              </p>
+              <p className="text-red-600">{dateError}</p>
             ) : dateRangeInfo ? (
               dateRangeInfo.valid ? (
                 <p className="text-green-600">
-                  ✓ Rango válido: {dateRangeInfo.days} días seleccionados. Puedes descargar el reporte.
+                  ✓ Rango válido: {dateRangeInfo.days} días seleccionados. Puedes descargar el
+                  reporte.
                 </p>
               ) : (
                 <p className="text-orange-600">
@@ -357,12 +377,10 @@ export function ReportsPage() {
                 </p>
               )
             ) : (
-              <p style={{ color: '#64748B' }}>
-                El rango mínimo para descargar es de 8 días.
-              </p>
+              <p style={{ color: '#64748B' }}>El rango mínimo para descargar es de 8 días.</p>
             )}
 
-            <Button 
+            <Button
               onClick={handleDownload}
               disabled={state !== 'ready' && state !== 'date-error' && state !== 'download-error'}
               className="w-full"
@@ -380,9 +398,9 @@ export function ReportsPage() {
           <CardTitle>Cargar archivo de estudiantes</CardTitle>
           <CardDescription>
             Sube el archivo Excel con los parámetros definidos.{' '}
-            <a 
-              href="#" 
-              className="underline" 
+            <a
+              href="#"
+              className="underline"
               style={{ color: '#2563EB' }}
               onClick={(e) => {
                 e.preventDefault();
@@ -397,9 +415,7 @@ export function ReportsPage() {
           {isUploadSuccess ? (
             <div className="flex items-center gap-3 p-6 rounded-lg bg-green-50">
               <CheckCircle className="w-6 h-6 text-green-600" />
-              <span style={{ color: '#0F172A' }}>
-                ¡Archivo cargado con éxito!
-              </span>
+              <span style={{ color: '#0F172A' }}>¡Archivo cargado con éxito!</span>
             </div>
           ) : (
             <div
@@ -408,16 +424,14 @@ export function ReportsPage() {
               onDrop={handleDrop}
               className="rounded-lg transition-all"
               style={{
-                border: state === 'upload-error' 
-                  ? '2px dashed #EF4444' 
-                  : isDragging 
-                  ? '2px dashed #2563EB' 
-                  : '2px dashed #CBD5E1',
-                backgroundColor: state === 'upload-error'
-                  ? '#FEF2F2'
-                  : isDragging
-                  ? '#EFF6FF'
-                  : '#FFFFFF',
+                border:
+                  state === 'upload-error'
+                    ? '2px dashed #EF4444'
+                    : isDragging
+                      ? '2px dashed #2563EB'
+                      : '2px dashed #CBD5E1',
+                backgroundColor:
+                  state === 'upload-error' ? '#FEF2F2' : isDragging ? '#EFF6FF' : '#FFFFFF',
                 padding: '48px 24px',
               }}
             >
@@ -431,22 +445,15 @@ export function ReportsPage() {
                   </>
                 ) : (
                   <>
-                    <Upload 
-                      className="w-12 h-12" 
-                      style={{ color: '#2563EB' }} 
-                    />
-                    <p style={{ color: '#64748B' }}>
-                      Arrastra tu archivo Excel aquí
-                    </p>
+                    <Upload className="w-12 h-12" style={{ color: '#2563EB' }} />
+                    <p style={{ color: '#64748B' }}>Arrastra tu archivo Excel aquí</p>
                   </>
                 )}
-                
+
                 <p style={{ color: '#64748B' }}>o</p>
-                
-                <Button onClick={handleSelectFileClick}>
-                  Seleccionar Archivo
-                </Button>
-                
+
+                <Button onClick={handleSelectFileClick}>Seleccionar Archivo</Button>
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -495,7 +502,7 @@ export function ReportsPage() {
                 </ul>
               </div>
 
-              <Button 
+              <Button
                 onClick={() => setState('empty')}
                 variant="outline"
                 className="w-full border-red-300 text-red-700 hover:bg-red-100"
@@ -511,9 +518,7 @@ export function ReportsPage() {
       {state === 'download-error' && (
         <Card className="border-orange-200 bg-orange-50">
           <CardHeader>
-            <CardTitle className="text-orange-700">
-              Error al Generar el Reporte
-            </CardTitle>
+            <CardTitle className="text-orange-700">Error al Generar el Reporte</CardTitle>
             <CardDescription className="text-orange-600">
               No se pudo completar la descarga del reporte
             </CardDescription>
@@ -532,7 +537,7 @@ export function ReportsPage() {
                 </div>
               </div>
 
-              <Button 
+              <Button
                 onClick={handleDownload}
                 variant="outline"
                 className="w-full border-orange-300 text-orange-700 hover:bg-orange-100"
@@ -549,29 +554,21 @@ export function ReportsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Estado del Procesamiento</CardTitle>
-          <CardDescription>
-            Visualiza el estado actual del procesamiento de datos.
-          </CardDescription>
+          <CardDescription>Visualiza el estado actual del procesamiento de datos.</CardDescription>
         </CardHeader>
         <CardContent>
           {(state === 'empty' || state === 'upload-error') && (
             <div className="flex flex-col items-center justify-center gap-3 p-12 bg-gray-50 rounded-lg">
               <Hourglass className="w-12 h-12" style={{ color: '#CBD5E1' }} />
-              <p style={{ color: '#CBD5E1' }}>
-                No hay reportes disponibles
-              </p>
-              <p style={{ color: '#CBD5E1' }}>
-                Sube un archivo de estudiantes para comenzar
-              </p>
+              <p style={{ color: '#CBD5E1' }}>No hay reportes disponibles</p>
+              <p style={{ color: '#CBD5E1' }}>Sube un archivo de estudiantes para comenzar</p>
             </div>
           )}
-          
+
           {(state === 'uploading' || state === 'processing') && (
             <div className="flex flex-col items-center justify-center gap-3 p-12 bg-blue-50 rounded-lg">
               <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
-              <p style={{ color: '#0F172A' }}>
-                Procesando datos...
-              </p>
+              <p style={{ color: '#0F172A' }}>Procesando datos...</p>
               <p style={{ color: '#64748B' }}>
                 Este reporte puede tardar hasta 48 horas en generarse.
               </p>
@@ -581,9 +578,7 @@ export function ReportsPage() {
           {(state === 'ready' || state === 'date-error' || state === 'download-error') && (
             <div className="flex flex-col items-center justify-center gap-3 p-12 bg-green-50 rounded-lg">
               <CheckCircle className="w-12 h-12 text-green-600" />
-              <p style={{ color: '#0F172A' }}>
-                Datos procesados correctamente
-              </p>
+              <p style={{ color: '#0F172A' }}>Datos procesados correctamente</p>
               <p style={{ color: '#64748B' }}>
                 Selecciona un rango de fechas arriba para descargar el reporte
               </p>

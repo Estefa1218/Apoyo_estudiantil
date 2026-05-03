@@ -93,9 +93,7 @@ export function Sidebar({ currentPage, onPageChange, userName, userEmail, onLogo
                 {item.icon}
                 <span className="font-medium">{item.label}</span>
               </div>
-              {currentPage === item.id && (
-                <ChevronRight className="w-5 h-5" />
-              )}
+              {currentPage === item.id && <ChevronRight className="w-5 h-5" />}
             </button>
           ))}
         </nav>
