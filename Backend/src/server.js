@@ -7,6 +7,7 @@ const pool = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const cargaRoutes = require('./routes/cargaRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const derivacionRoutes = require('./routes/derivacionRoutes');
 const { authenticateToken } = require('./middleware/authMiddleware');
 const { uploadStudentsFile, getLoadStatus } = require('./controllers/uploadController');
 const { startListener, stopListener, getListenerStatus } = require('./controllers/responseListenerController');
@@ -45,6 +46,7 @@ const upload = multer({
 app.use('/api/auth', authRoutes);
 app.use('/api/cargas', authenticateToken, cargaRoutes);
 app.use('/api/report', authenticateToken, reportRoutes);
+app.use('/api/derivacion', authenticateToken, derivacionRoutes);
 
 // ============ ENDPOINT DE UPLOAD CON MEJOR MANEJO DE ERRORES ============
 app.post('/api/upload', authenticateToken, (req, res, next) => {

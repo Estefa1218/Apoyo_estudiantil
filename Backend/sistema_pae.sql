@@ -52,12 +52,16 @@ CREATE TABLE IF NOT EXISTS Estudiante_Carga (
   intentos_enviados INT DEFAULT 0,
   fecha_respuesta TIMESTAMP NULL,
   motivo_respuesta TEXT NULL,
+  requiere_derivacion BOOLEAN DEFAULT FALSE,
+  email_profesional_derivado VARCHAR(255) NULL,
+  fecha_derivacion TIMESTAMP NULL,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (carga_id) REFERENCES Carga_Masiva(carga_id),
   FOREIGN KEY (estudiante_id) REFERENCES Estudiante(estudiante_id),
   INDEX idx_carga (carga_id),
   INDEX idx_email (email),
   INDEX idx_estado (estado_seguimiento),
+  INDEX idx_derivacion (requiere_derivacion),
   UNIQUE KEY unique_carga_email (carga_id, email)
 );
 
@@ -71,6 +75,20 @@ CREATE TABLE IF NOT EXISTS Auditoria_Carga (
   FOREIGN KEY (carga_id) REFERENCES Carga_Masiva(carga_id),
   INDEX idx_carga (carga_id),
   INDEX idx_fecha (fecha_evento)
+);
+
+-- Tabla para gestión de recursos/repositorio de ausentisos
+CREATE TABLE IF NOT EXISTS Recursos_Ausentisos (
+  recurso_id INT AUTO_INCREMENT PRIMARY KEY,
+  estudiante_carga_id INT NOT NULL,
+  tipo_recurso ENUM('PDF', 'DOCUMENTACION', 'PRESENTACION', 'URL') NOT NULL,
+  descripcion VARCHAR(255) NOT NULL,
+  archivo_url VARCHAR(500) NULL,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (estudiante_carga_id) REFERENCES Estudiante_Carga(estudiante_carga_id) ON DELETE CASCADE,
+  INDEX idx_estudiante (estudiante_carga_id),
+  INDEX idx_tipo (tipo_recurso)
 );
 
 -- Insertar un profesional de prueba si no existe

@@ -1,0 +1,280 @@
+{
+  "ejemplos_derivacion": {
+    "agregar_derivacion": {
+      "endpoint": "POST /api/derivacion/derivacion",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "body": {
+        "estudianteCargaId": 1,
+        "cargaId": 5,
+        "emailProfesional": "psicólogo@hospital.com"
+      },
+      "respuesta_exitosa": {
+        "success": true,
+        "message": "Derivación agregada exitosamente",
+        "data": {
+          "estudianteCargaId": 1,
+          "emailProfesional": "psicólogo@hospital.com",
+          "fecha_derivacion": "2026-06-02T10:30:00.000Z"
+        }
+      }
+    },
+    "eliminar_derivacion": {
+      "endpoint": "DELETE /api/derivacion/derivacion/:estudianteCargaId/:cargaId",
+      "ejemplo_url": "DELETE /api/derivacion/derivacion/1/5",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "respuesta_exitosa": {
+        "success": true,
+        "message": "Derivación eliminada exitosamente"
+      }
+    },
+    "obtener_derivaciones": {
+      "endpoint": "GET /api/derivacion/derivaciones/:cargaId",
+      "ejemplo_url": "GET /api/derivacion/derivaciones/5",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "respuesta_exitosa": {
+        "success": true,
+        "cargaId": 5,
+        "derivaciones": [
+          {
+            "estudiante_carga_id": 1,
+            "nombre_completo": "Juan García",
+            "email": "juan@mail.com",
+            "email_profesional_derivado": "psicólogo@hospital.com",
+            "fecha_derivacion": "2026-06-02T10:30:00.000Z",
+            "estado_seguimiento": "respondido"
+          }
+        ]
+      }
+    },
+    "agregar_recurso_archivo": {
+      "endpoint": "POST /api/derivacion/recurso",
+      "content_type": "multipart/form-data",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "campos": {
+        "archivo": "FILE (requerido para PDF, DOCUMENTACION, PRESENTACION)",
+        "estudianteCargaId": "number (requerido)",
+        "tipoRecurso": "enum: PDF | DOCUMENTACION | PRESENTACION | URL",
+        "descripcion": "string (máximo 255 caracteres)"
+      },
+      "ejemplo_curl": "curl -X POST http://localhost:3001/api/derivacion/recurso -H 'Authorization: Bearer TOKEN' -F 'archivo=@documento.pdf' -F 'estudianteCargaId=1' -F 'tipoRecurso=PDF' -F 'descripcion=Certificado médico'",
+      "respuesta_exitosa": {
+        "success": true,
+        "message": "Recurso agregado exitosamente",
+        "data": {
+          "recursoId": 10,
+          "estudianteCargaId": 1,
+          "tipoRecurso": "PDF",
+          "descripcion": "Certificado médico",
+          "archivo_url": "uploads/recursos/abc123def456",
+          "fecha_creacion": "2026-06-02T10:30:00.000Z"
+        }
+      }
+    },
+    "agregar_recurso_url": {
+      "endpoint": "POST /api/derivacion/recurso",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "body": {
+        "estudianteCargaId": 1,
+        "tipoRecurso": "URL",
+        "descripcion": "Presentación en Google Drive",
+        "archivoUrl": "https://drive.google.com/file/d/ABC123/view"
+      },
+      "respuesta_exitosa": {
+        "success": true,
+        "message": "Recurso agregado exitosamente",
+        "data": {
+          "recursoId": 11,
+          "estudianteCargaId": 1,
+          "tipoRecurso": "URL",
+          "descripcion": "Presentación en Google Drive",
+          "archivo_url": "https://drive.google.com/file/d/ABC123/view",
+          "fecha_creacion": "2026-06-02T10:31:00.000Z"
+        }
+      }
+    },
+    "obtener_recursos": {
+      "endpoint": "GET /api/derivacion/recursos/:estudianteCargaId",
+      "ejemplo_url": "GET /api/derivacion/recursos/1",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "respuesta_exitosa": {
+        "success": true,
+        "estudianteCargaId": 1,
+        "recursos": [
+          {
+            "recurso_id": 10,
+            "tipo_recurso": "PDF",
+            "descripcion": "Certificado médico",
+            "archivo_url": "uploads/recursos/abc123def456",
+            "fecha_creacion": "2026-06-02T10:30:00.000Z",
+            "fecha_actualizacion": "2026-06-02T10:30:00.000Z"
+          },
+          {
+            "recurso_id": 11,
+            "tipo_recurso": "URL",
+            "descripcion": "Presentación en Drive",
+            "archivo_url": "https://drive.google.com/file/d/ABC123/view",
+            "fecha_creacion": "2026-06-02T10:31:00.000Z",
+            "fecha_actualizacion": "2026-06-02T10:31:00.000Z"
+          }
+        ]
+      }
+    },
+    "actualizar_recurso_descripcion": {
+      "endpoint": "PUT /api/derivacion/recurso/:recursoId",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "body": {
+        "descripcion": "Certificado médico actualizado"
+      },
+      "respuesta_exitosa": {
+        "success": true,
+        "message": "Recurso actualizado exitosamente",
+        "data": {
+          "recursoId": 10,
+          "descripcion": "Certificado médico actualizado",
+          "archivo_url": "uploads/recursos/abc123def456"
+        }
+      }
+    },
+    "actualizar_recurso_archivo": {
+      "endpoint": "PUT /api/derivacion/recurso/:recursoId",
+      "content_type": "multipart/form-data",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "campos": {
+        "archivo": "FILE (opcional, para cambiar archivo)",
+        "descripcion": "string (opcional, para cambiar descripción)"
+      },
+      "ejemplo_curl": "curl -X PUT http://localhost:3001/api/derivacion/recurso/10 -H 'Authorization: Bearer TOKEN' -F 'archivo=@nuevo_documento.pdf' -F 'descripcion=Nueva descripción'"
+    },
+    "eliminar_recurso": {
+      "endpoint": "DELETE /api/derivacion/recurso/:recursoId",
+      "ejemplo_url": "DELETE /api/derivacion/recurso/10",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "respuesta_exitosa": {
+        "success": true,
+        "message": "Recurso eliminado exitosamente"
+      }
+    },
+    "descargar_recurso": {
+      "endpoint": "GET /api/derivacion/recurso/descargar/:recursoId",
+      "ejemplo_url": "GET /api/derivacion/recurso/descargar/10",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "respuesta_archivo": "Descarga directa del archivo",
+      "respuesta_url": {
+        "success": true,
+        "type": "url",
+        "url": "https://drive.google.com/file/d/ABC123/view"
+      }
+    }
+  },
+  "tipos_recurso_validos": [
+    {
+      "tipo": "PDF",
+      "descripcion": "Archivos PDF",
+      "extensiones": [".pdf"],
+      "requiere_archivo": true,
+      "casos_uso": "Certificados médicos, justificantes, documentos formales"
+    },
+    {
+      "tipo": "DOCUMENTACION",
+      "descripcion": "Documentos de office",
+      "extensiones": [".doc", ".docx", ".xls", ".xlsx", ".txt"],
+      "requiere_archivo": true,
+      "casos_uso": "Reportes, análisis, datos en Excel, documentos de texto"
+    },
+    {
+      "tipo": "PRESENTACION",
+      "descripcion": "Presentaciones",
+      "extensiones": [".ppt", ".pptx"],
+      "requiere_archivo": true,
+      "casos_uso": "Diapositivas, proyectos, charlas"
+    },
+    {
+      "tipo": "URL",
+      "descripcion": "Enlaces web",
+      "extensiones": ["http://", "https://"],
+      "requiere_archivo": false,
+      "casos_uso": "Google Drive, OneDrive, YouTube, sitios web compartidos"
+    }
+  ],
+  "validaciones": {
+    "emailProfesional": {
+      "tipo": "string",
+      "requerido": true,
+      "formato": "email válido (debe contener @)",
+      "ejemplo": "doctor@hospital.com"
+    },
+    "tipoRecurso": {
+      "tipo": "enum",
+      "requerido": true,
+      "valores_permitidos": ["PDF", "DOCUMENTACION", "PRESENTACION", "URL"],
+      "sensible_a_mayusculas": true
+    },
+    "descripcion": {
+      "tipo": "string",
+      "requerido": true,
+      "longitud_maxima": 255,
+      "ejemplo": "Certificado médico por consulta al CIMUN"
+    },
+    "archivo": {
+      "tipo": "File",
+      "requerido": true,
+      "para_tipos": ["PDF", "DOCUMENTACION", "PRESENTACION"],
+      "tamaño_maximo": "100MB",
+      "extensiones_permitidas": [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt"]
+    },
+    "archivoUrl": {
+      "tipo": "string",
+      "requerido": true,
+      "para_tipos": ["URL"],
+      "formato": "URL válida (debe comenzar con http:// o https://)",
+      "ejemplo": "https://drive.google.com/file/d/1ABC123/view"
+    },
+    "estudianteCargaId": {
+      "tipo": "number",
+      "requerido": true,
+      "debe_existir_en": "Estudiante_Carga"
+    },
+    "cargaId": {
+      "tipo": "number",
+      "requerido": true,
+      "debe_existir_en": "Carga_Masiva"
+    }
+  },
+  "codigos_error": {
+    "400": {
+      "descripcion": "Solicitud inválida",
+      "causas": ["Faltan parámetros requeridos", "Formato incorrecto", "Validación fallida"]
+    },
+    "404": {
+      "descripcion": "Recurso no encontrado",
+      "causas": ["Estudiante no existe", "Derivación no existe", "Recurso no existe"]
+    },
+    "500": {
+      "descripcion": "Error interno del servidor",
+      "causas": ["Error en BD", "Error al guardar archivo", "Error de sistema"]
+    }
+  }
+}

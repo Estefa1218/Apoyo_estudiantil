@@ -89,7 +89,8 @@ exports.getCargaStudents = async (req, res) => {
   try {
     const [rows] = await pool.execute(
       `SELECT estudiante_carga_id, nombre_completo, email, dias_ausente, estado_seguimiento,
-        fecha_primer_intento, intentos_enviados, fecha_respuesta, motivo_respuesta, fecha_creacion
+        fecha_primer_intento, intentos_enviados, fecha_respuesta, motivo_respuesta, fecha_creacion,
+        requiere_derivacion, email_profesional_derivado, fecha_derivacion
        FROM Estudiante_Carga
        WHERE carga_id = ?
        ORDER BY nombre_completo ASC`,
