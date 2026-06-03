@@ -17,7 +17,7 @@ export function LoginPage({ onLogin }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validación básica
     if (!email || !password) {
       setError('Por favor, completa todos los campos');
@@ -42,7 +42,7 @@ export function LoginPage({ onLogin }: Props) {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center p-4"
       style={{ backgroundColor: '#F4F7FA' }}
     >
@@ -51,12 +51,8 @@ export function LoginPage({ onLogin }: Props) {
           <div className="mx-auto w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
             <LogIn className="w-8 h-8 text-white" />
           </div>
-          <CardTitle className="text-2xl">
-            Sistema de Seguimiento Estudiantil
-          </CardTitle>
-          <CardDescription>
-            Ingresa tus credenciales para acceder al sistema
-          </CardDescription>
+          <CardTitle className="text-2xl">Sistema de Seguimiento Estudiantil</CardTitle>
+          <CardDescription>Ingresa tus credenciales para acceder al sistema</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -94,20 +90,12 @@ export function LoginPage({ onLogin }: Props) {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
-            {error && (
-              <p className="text-red-600 text-sm">
-                {error}
-              </p>
-            )}
+            {error && <p className="text-red-600 text-sm">{error}</p>}
 
             <Button type="submit" className="w-full">
               <LogIn className="w-4 h-4 mr-2" />
