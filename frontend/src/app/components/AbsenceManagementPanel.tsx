@@ -18,6 +18,7 @@ type Category = {
   name: string;
   description: string;
   requiresProfessional: boolean;
+  professionalEmail?: string;
 };
 
 type Action = {
@@ -26,14 +27,17 @@ type Action = {
   name: string;
   description: string;
   autoSendToProfessional: boolean;
+  professionalEmail?: string;
 };
 
 type Resource = {
   id: string;
   actionId: string;
   name: string;
-  type: 'document' | 'pdf' | 'presentation';
-  url: string;
+  type: 'document' | 'pdf' | 'presentation' | 'url';
+  url?: string;
+  fileBase64?: string;
+  fileName?: string;
   description: string;
 };
 
@@ -53,6 +57,7 @@ export function AbsenceManagementPage() {
     name: '',
     description: '',
     requiresProfessional: false,
+    professionalEmail: '',
   });
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
 
@@ -63,6 +68,7 @@ export function AbsenceManagementPage() {
     name: '',
     description: '',
     autoSendToProfessional: false,
+    professionalEmail: '',
   });
   const [editingAction, setEditingAction] = useState<string | null>(null);
 
@@ -73,6 +79,8 @@ export function AbsenceManagementPage() {
     name: '',
     type: 'document',
     url: '',
+    fileBase64: '',
+    fileName: '',
     description: '',
   });
   const [editingResource, setEditingResource] = useState<string | null>(null);
@@ -145,6 +153,7 @@ export function AbsenceManagementPage() {
         name: newCategory.name,
         description: newCategory.description || '',
         requiresProfessional: newCategory.requiresProfessional || false,
+        professionalEmail: newCategory.professionalEmail || '',
       };
       setCategories([...categories, category]);
       setNewCategory({
@@ -152,6 +161,7 @@ export function AbsenceManagementPage() {
         name: '',
         description: '',
         requiresProfessional: false,
+        professionalEmail: '',
       });
     }
   };
@@ -177,6 +187,7 @@ export function AbsenceManagementPage() {
         name: newAction.name,
         description: newAction.description || '',
         autoSendToProfessional: newAction.autoSendToProfessional || false,
+        professionalEmail: newAction.professionalEmail || '',
       };
       setActions([...actions, action]);
       setNewAction({
@@ -184,6 +195,7 @@ export function AbsenceManagementPage() {
         name: '',
         description: '',
         autoSendToProfessional: false,
+        professionalEmail: '',
       });
     }
   };
@@ -203,13 +215,18 @@ export function AbsenceManagementPage() {
 
   // Funciones para recursos
   const addResource = () => {
-    if (newResource.name && newResource.actionId && newResource.url) {
+    const isUrlType = newResource.type === 'url';
+    const hasContent = isUrlType ? newResource.url : newResource.fileBase64;
+    
+    if (newResource.name && newResource.actionId && hasContent) {
       const resource: Resource = {
         id: Date.now().toString(),
         actionId: newResource.actionId,
         name: newResource.name,
         type: newResource.type || 'document',
-        url: newResource.url,
+        url: newResource.url || '',
+        fileBase64: newResource.fileBase64 || '',
+        fileName: newResource.fileName || '',
         description: newResource.description || '',
       };
       setResources([...resources, resource]);
@@ -218,6 +235,8 @@ export function AbsenceManagementPage() {
         name: '',
         type: 'document',
         url: '',
+        fileBase64: '',
+        fileName: '',
         description: '',
       });
     }
@@ -311,7 +330,7 @@ export function AbsenceManagementPage() {
                     onChange={(e) => setNewTaxonomy(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addTaxonomy()}
                   />
-                  <Button onClick={addTaxonomy}>
+                  <Button onClick={addTaxonomy} className="bg-blue-600 hover:bg-blue-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar
                   </Button>
@@ -345,6 +364,7 @@ export function AbsenceManagementPage() {
                             <Button
                               size="sm"
                               onClick={() => updateTaxonomy(taxonomy.id)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
                               <Save className="w-4 h-4" />
                             </Button>
@@ -450,7 +470,18 @@ export function AbsenceManagementPage() {
                       Requiere derivación a profesional de bienestar
                     </Label>
                   </div>
-                  <Button onClick={addCategory} disabled={!newCategory.name || !newCategory.taxonomyId}>
+                  {newCategory.requiresProfessional && (
+                    <div className="space-y-2">
+                      <Label>Correo del Profesional</Label>
+                      <Input
+                        type="email"
+                        placeholder="profesional@ejemplo.com"
+                        value={newCategory.professionalEmail || ''}
+                        onChange={(e) => setNewCategory({ ...newCategory, professionalEmail: e.target.value })}
+                      />
+                    </div>
+                  )}
+                  <Button onClick={addCategory} disabled={!newCategory.name || !newCategory.taxonomyId} className="bg-blue-600 hover:bg-blue-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Categoría
                   </Button>
@@ -484,26 +515,104 @@ export function AbsenceManagementPage() {
                                 key={category.id}
                                 className="p-4 bg-gray-50 rounded-lg border border-gray-200"
                               >
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex-1">
-                                    <p style={{ color: '#0F172A' }}>{category.name}</p>
-                                    <p className="text-sm mt-1" style={{ color: '#64748B' }}>
-                                      {category.description}
-                                    </p>
+                                {editingCategory === category.id ? (
+                                  <div className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label>Nombre de la Categoría</Label>
+                                      <Input
+                                        value={category.name}
+                                        onChange={(e) => updateCategory(category.id, { name: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Descripción</Label>
+                                      <textarea
+                                        className="w-full rounded-md border border-gray-300 p-2 min-h-[80px]"
+                                        value={category.description}
+                                        onChange={(e) => updateCategory(category.id, { description: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`requiresProfessional-${category.id}`}
+                                        checked={category.requiresProfessional}
+                                        onChange={(e) => updateCategory(category.id, { requiresProfessional: e.target.checked })}
+                                      />
+                                      <Label htmlFor={`requiresProfessional-${category.id}`}>
+                                        Requiere derivación a profesional de bienestar
+                                      </Label>
+                                    </div>
                                     {category.requiresProfessional && (
-                                      <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">
-                                        <Settings className="w-3 h-3" />
-                                        Requiere profesional
-                                      </span>
+                                      <div className="space-y-2">
+                                        <Label>Correo del Profesional</Label>
+                                        <Input
+                                          type="email"
+                                          placeholder="profesional@ejemplo.com"
+                                          value={category.professionalEmail || ''}
+                                          onChange={(e) => updateCategory(category.id, { professionalEmail: e.target.value })}
+                                        />
+                                      </div>
                                     )}
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => setEditingCategory(null)}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                      >
+                                        <Save className="w-4 h-4 mr-2" />
+                                        Guardar
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setEditingCategory(null)}
+                                      >
+                                        Cancelar
+                                      </Button>
+                                    </div>
                                   </div>
-                                  <button
-                                    onClick={() => deleteCategory(category.id)}
-                                    className="p-2 rounded hover:bg-red-100 transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-600" />
-                                  </button>
-                                </div>
+                                ) : (
+                                  <>
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div className="flex-1">
+                                        <p style={{ color: '#0F172A' }}>{category.name}</p>
+                                        <p className="text-sm mt-1" style={{ color: '#64748B' }}>
+                                          {category.description}
+                                        </p>
+                                        {category.requiresProfessional && (
+                                          <div className="mt-2 space-y-1">
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">
+                                              <Settings className="w-3 h-3" />
+                                              Requiere profesional
+                                            </span>
+                                            {category.professionalEmail && (
+                                              <p className="text-xs" style={{ color: '#64748B' }}>
+                                                📧 {category.professionalEmail}
+                                              </p>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() => {
+                                            setEditingCategory(category.id);
+                                          }}
+                                          className="p-2 rounded hover:bg-blue-100 transition-colors"
+                                        >
+                                          <Edit2 className="w-4 h-4" style={{ color: '#2563EB' }} />
+                                        </button>
+                                        <button
+                                          onClick={() => deleteCategory(category.id)}
+                                          className="p-2 rounded hover:bg-blue-100 transition-colors"
+                                        >
+                                          <Trash2 className="w-4 h-4" style={{ color: '#2563EB' }} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -572,7 +681,18 @@ export function AbsenceManagementPage() {
                       Enviar automáticamente a profesional de bienestar
                     </Label>
                   </div>
-                  <Button onClick={addAction} disabled={!newAction.name || !newAction.taxonomyId}>
+                  {newAction.autoSendToProfessional && (
+                    <div className="space-y-2">
+                      <Label>Correo del Profesional</Label>
+                      <Input
+                        type="email"
+                        placeholder="profesional@ejemplo.com"
+                        value={newAction.professionalEmail || ''}
+                        onChange={(e) => setNewAction({ ...newAction, professionalEmail: e.target.value })}
+                      />
+                    </div>
+                  )}
+                  <Button onClick={addAction} disabled={!newAction.name || !newAction.taxonomyId} className="bg-blue-600 hover:bg-blue-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Acción
                   </Button>
@@ -606,26 +726,102 @@ export function AbsenceManagementPage() {
                                 key={action.id}
                                 className="p-4 bg-gray-50 rounded-lg border border-gray-200"
                               >
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex-1">
-                                    <p style={{ color: '#0F172A' }}>{action.name}</p>
-                                    <p className="text-sm mt-1" style={{ color: '#64748B' }}>
-                                      {action.description}
-                                    </p>
+                                {editingAction === action.id ? (
+                                  <div className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label>Nombre de la Acción</Label>
+                                      <Input
+                                        value={action.name}
+                                        onChange={(e) => updateAction(action.id, { name: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Descripción</Label>
+                                      <textarea
+                                        className="w-full rounded-md border border-gray-300 p-2 min-h-[80px]"
+                                        value={action.description}
+                                        onChange={(e) => updateAction(action.id, { description: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`autoSend-${action.id}`}
+                                        checked={action.autoSendToProfessional}
+                                        onChange={(e) => updateAction(action.id, { autoSendToProfessional: e.target.checked })}
+                                      />
+                                      <Label htmlFor={`autoSend-${action.id}`}>
+                                        Enviar automáticamente a profesional de bienestar
+                                      </Label>
+                                    </div>
                                     {action.autoSendToProfessional && (
-                                      <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
-                                        <Settings className="w-3 h-3" />
-                                        Envío automático a profesional
-                                      </span>
+                                      <div className="space-y-2">
+                                        <Label>Correo del Profesional</Label>
+                                        <Input
+                                          type="email"
+                                          placeholder="profesional@ejemplo.com"
+                                          value={action.professionalEmail || ''}
+                                          onChange={(e) => updateAction(action.id, { professionalEmail: e.target.value })}
+                                        />
+                                      </div>
                                     )}
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => setEditingAction(null)}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                      >
+                                        <Save className="w-4 h-4 mr-2" />
+                                        Guardar
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setEditingAction(null)}
+                                      >
+                                        Cancelar
+                                      </Button>
+                                    </div>
                                   </div>
-                                  <button
-                                    onClick={() => deleteAction(action.id)}
-                                    className="p-2 rounded hover:bg-red-100 transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-600" />
-                                  </button>
-                                </div>
+                                ) : (
+                                  <>
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div className="flex-1">
+                                        <p style={{ color: '#0F172A' }}>{action.name}</p>
+                                        <p className="text-sm mt-1" style={{ color: '#64748B' }}>
+                                          {action.description}
+                                        </p>
+                                        {action.autoSendToProfessional && (
+                                          <div className="mt-2 space-y-1">
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                                              <Settings className="w-3 h-3" />
+                                              Envío automático a profesional
+                                            </span>
+                                            {action.professionalEmail && (
+                                              <p className="text-xs" style={{ color: '#64748B' }}>
+                                                📧 {action.professionalEmail}
+                                              </p>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() => setEditingAction(action.id)}
+                                          className="p-2 rounded hover:bg-blue-100 transition-colors"
+                                        >
+                                          <Edit2 className="w-4 h-4" style={{ color: '#2563EB' }} />
+                                        </button>
+                                        <button
+                                          onClick={() => deleteAction(action.id)}
+                                          className="p-2 rounded hover:bg-blue-100 transition-colors"
+                                        >
+                                          <Trash2 className="w-4 h-4" style={{ color: '#2563EB' }} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -646,7 +842,7 @@ export function AbsenceManagementPage() {
               <CardHeader>
                 <CardTitle>Agregar Nuevo Recurso</CardTitle>
                 <CardDescription>
-                  Agrega documentos, PDFs o presentaciones asociados a acciones específicas
+                  Agrega documentos, PDFs, presentaciones o enlaces a recursos asociados a acciones específicas
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -682,21 +878,69 @@ export function AbsenceManagementPage() {
                     <select
                       className="w-full rounded-md border border-gray-300 p-2"
                       value={newResource.type}
-                      onChange={(e) => setNewResource({ ...newResource, type: e.target.value as Resource['type'] })}
+                      onChange={(e) => {
+                        const newType = e.target.value as Resource['type'];
+                        setNewResource({ 
+                          ...newResource, 
+                          type: newType,
+                          url: '',
+                          fileBase64: '',
+                          fileName: ''
+                        });
+                      }}
                     >
                       <option value="document">Documento</option>
                       <option value="pdf">PDF</option>
                       <option value="presentation">Presentación</option>
+                      <option value="url">URL Externa</option>
                     </select>
                   </div>
-                  <div className="space-y-2">
-                    <Label>URL del Recurso</Label>
-                    <Input
-                      placeholder="https://..."
-                      value={newResource.url}
-                      onChange={(e) => setNewResource({ ...newResource, url: e.target.value })}
-                    />
-                  </div>
+                  
+                  {newResource.type === 'url' ? (
+                    <div className="space-y-2">
+                      <Label>URL del Recurso</Label>
+                      <Input
+                        placeholder="https://..."
+                        value={newResource.url || ''}
+                        onChange={(e) => setNewResource({ ...newResource, url: e.target.value })}
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label>Cargar Archivo</Label>
+                      <input
+                        type="file"
+                        className="w-full rounded-md border border-gray-300 p-2"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const base64 = event.target?.result as string;
+                              setNewResource({
+                                ...newResource,
+                                fileBase64: base64,
+                                fileName: file.name,
+                              });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        accept={
+                          newResource.type === 'pdf' 
+                            ? '.pdf'
+                            : newResource.type === 'presentation'
+                            ? '.pptx,.ppt,.odp'
+                            : '.doc,.docx,.odt,.txt'
+                        }
+                      />
+                      {newResource.fileName && (
+                        <p className="text-sm" style={{ color: '#64748B' }}>
+                          📁 {newResource.fileName}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label>Descripción</Label>
                     <textarea
@@ -708,7 +952,8 @@ export function AbsenceManagementPage() {
                   </div>
                   <Button 
                     onClick={addResource} 
-                    disabled={!newResource.name || !newResource.actionId || !newResource.url}
+                    disabled={!newResource.name || !newResource.actionId || (newResource.type === 'url' ? !newResource.url : !newResource.fileBase64)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Recurso
@@ -745,37 +990,174 @@ export function AbsenceManagementPage() {
                                 key={resource.id}
                                 className="p-4 bg-gray-50 rounded-lg border border-gray-200"
                               >
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <FileText className="w-4 h-4" style={{ color: '#2563EB' }} />
-                                      <p style={{ color: '#0F172A' }}>{resource.name}</p>
-                                      <span className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded">
-                                        {resource.type}
-                                      </span>
+                                {editingResource === resource.id ? (
+                                  <div className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label>Nombre del Recurso</Label>
+                                      <Input
+                                        value={resource.name}
+                                        onChange={(e) => updateResource(resource.id, { name: e.target.value })}
+                                      />
                                     </div>
-                                    {resource.description && (
-                                      <p className="text-sm mt-1" style={{ color: '#64748B' }}>
-                                        {resource.description}
-                                      </p>
+                                    <div className="space-y-2">
+                                      <Label>Descripción</Label>
+                                      <textarea
+                                        className="w-full rounded-md border border-gray-300 p-2 min-h-[80px]"
+                                        value={resource.description}
+                                        onChange={(e) => updateResource(resource.id, { description: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Tipo de Recurso</Label>
+                                      <select
+                                        className="w-full rounded-md border border-gray-300 p-2"
+                                        value={resource.type}
+                                        onChange={(e) => {
+                                          const newType = e.target.value as Resource['type'];
+                                          updateResource(resource.id, { 
+                                            type: newType,
+                                            url: '',
+                                            fileBase64: '',
+                                            fileName: ''
+                                          });
+                                        }}
+                                      >
+                                        <option value="document">Documento</option>
+                                        <option value="pdf">PDF</option>
+                                        <option value="presentation">Presentación</option>
+                                        <option value="url">URL Externa</option>
+                                      </select>
+                                    </div>
+                                    
+                                    {resource.type === 'url' ? (
+                                      <div className="space-y-2">
+                                        <Label>URL del Recurso</Label>
+                                        <Input
+                                          placeholder="https://..."
+                                          value={resource.url || ''}
+                                          onChange={(e) => updateResource(resource.id, { url: e.target.value })}
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-2">
+                                        <Label>Cargar Archivo</Label>
+                                        <input
+                                          type="file"
+                                          className="w-full rounded-md border border-gray-300 p-2"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              const reader = new FileReader();
+                                              reader.onload = (event) => {
+                                                const base64 = event.target?.result as string;
+                                                updateResource(resource.id, {
+                                                  fileBase64: base64,
+                                                  fileName: file.name,
+                                                });
+                                              };
+                                              reader.readAsDataURL(file);
+                                            }
+                                          }}
+                                          accept={
+                                            resource.type === 'pdf' 
+                                              ? '.pdf'
+                                              : resource.type === 'presentation'
+                                              ? '.pptx,.ppt,.odp'
+                                              : '.doc,.docx,.odt,.txt'
+                                          }
+                                        />
+                                        {resource.fileName && (
+                                          <p className="text-sm" style={{ color: '#64748B' }}>
+                                            📁 {resource.fileName}
+                                          </p>
+                                        )}
+                                      </div>
                                     )}
-                                    <a
-                                      href={resource.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-sm mt-2 inline-block underline"
-                                      style={{ color: '#2563EB' }}
-                                    >
-                                      Abrir recurso →
-                                    </a>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => setEditingResource(null)}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                      >
+                                        <Save className="w-4 h-4 mr-2" />
+                                        Guardar
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setEditingResource(null)}
+                                      >
+                                        Cancelar
+                                      </Button>
+                                    </div>
                                   </div>
-                                  <button
-                                    onClick={() => deleteResource(resource.id)}
-                                    className="p-2 rounded hover:bg-red-100 transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-600" />
-                                  </button>
-                                </div>
+                                ) : (
+                                  <>
+                                    <div className="flex items-start justify-between">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <FileText className="w-4 h-4" style={{ color: '#2563EB' }} />
+                                          <p style={{ color: '#0F172A' }}>{resource.name}</p>
+                                          <span className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded">
+                                            {resource.type}
+                                          </span>
+                                        </div>
+                                        {resource.description && (
+                                          <p className="text-sm mt-1" style={{ color: '#64748B' }}>
+                                            {resource.description}
+                                          </p>
+                                        )}
+                                        {resource.type === 'url' ? (
+                                          <a
+                                            href={resource.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm mt-2 inline-block underline"
+                                            style={{ color: '#2563EB' }}
+                                          >
+                                            Abrir recurso →
+                                          </a>
+                                        ) : (
+                                          <>
+                                            {resource.fileName && (
+                                              <p className="text-xs mt-2" style={{ color: '#64748B' }}>
+                                                📁 {resource.fileName}
+                                              </p>
+                                            )}
+                                            <button
+                                              onClick={() => {
+                                                if (resource.fileBase64) {
+                                                  const link = document.createElement('a');
+                                                  link.href = resource.fileBase64;
+                                                  link.download = resource.fileName || resource.name;
+                                                  link.click();
+                                                }
+                                              }}
+                                              className="text-sm mt-2 inline-block underline"
+                                              style={{ color: '#2563EB' }}
+                                            >
+                                              Descargar archivo →
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() => setEditingResource(resource.id)}
+                                          className="p-2 rounded hover:bg-blue-100 transition-colors"
+                                        >
+                                          <Edit2 className="w-4 h-4" style={{ color: '#2563EB' }} />
+                                        </button>
+                                        <button
+                                          onClick={() => deleteResource(resource.id)}
+                                          className="p-2 rounded hover:bg-blue-100 transition-colors"
+                                        >
+                                          <Trash2 className="w-4 h-4" style={{ color: '#2563EB' }} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             ))}
                           </div>
