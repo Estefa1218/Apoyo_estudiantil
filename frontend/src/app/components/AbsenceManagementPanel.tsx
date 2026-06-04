@@ -365,14 +365,11 @@ export function AbsenceManagementPage() {
                               onKeyPress={(e) => e.key === 'Enter' && updateTaxonomy(taxonomy.id)}
                             />
                             <Button 
-                            size="sm"
+                              size="sm"
                               onClick={() => updateTaxonomy(taxonomy.id)}
                               className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
-
-                            <Button size="sm" onClick={() => updateTaxonomy(taxonomy.id)}>
- f7adffd45c3ad54aa914480b7817f75112af61a0
-                              <Save className="w-4 h-4" />
+                              <Save className="w-4 h-4 mr-2" /> Guardar
                             </Button>
                             <Button
                               size="sm"
@@ -495,14 +492,11 @@ export function AbsenceManagementPage() {
                       />
                     </div>
                   )}
-                  <Button onClick={addCategory} 
-                  disabled={!newCategory.name || !newCategory.taxonomyId} className="bg-blue-600 hover:bg-blue-700 text-white">
-
-                  <Button
-                    onClick={addCategory}
-                    disabled={!newCategory.name || !newCategory.taxonomyId}
+                  <Button 
+                    onClick={addCategory} 
+                    disabled={!newCategory.name || !newCategory.taxonomyId} 
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
- f7adffd45c3ad54aa914480b7817f75112af61a0
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Categoría
                   </Button>
@@ -717,7 +711,11 @@ export function AbsenceManagementPage() {
                       />
                     </div>
                   )}
-                  <Button onClick={addAction} disabled={!newAction.name || !newAction.taxonomyId} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button 
+                    onClick={addAction} 
+                    disabled={!newAction.name || !newAction.taxonomyId} 
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Acción
                   </Button>
@@ -903,7 +901,6 @@ export function AbsenceManagementPage() {
                     <select
                       className="w-full rounded-md border border-gray-300 p-2"
                       value={newResource.type}
-HEAD
                       onChange={(e) => {
                         const newType = e.target.value as Resource['type'];
                         setNewResource({ 
@@ -914,11 +911,6 @@ HEAD
                           fileName: ''
                         });
                       }}
-
-                      onChange={(e) =>
-                        setNewResource({ ...newResource, type: e.target.value as Resource['type'] })
-                      }
-f7adffd45c3ad54aa914480b7817f75112af61a0
                     >
                       <option value="document">Documento</option>
                       <option value="pdf">PDF</option>
@@ -983,15 +975,10 @@ f7adffd45c3ad54aa914480b7817f75112af61a0
                       }
                     />
                   </div>
-HEAD
                   <Button 
                     onClick={addResource} 
                     disabled={!newResource.name || !newResource.actionId || (newResource.type === 'url' ? !newResource.url : !newResource.fileBase64)}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
-                   <Button
-                    onClick={addResource}
-                    disabled={!newResource.name || !newResource.actionId || !newResource.url}
- f7adffd45c3ad54aa914480b7817f75112af61a0
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Recurso
