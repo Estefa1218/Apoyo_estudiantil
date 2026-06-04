@@ -364,15 +364,14 @@ export function AbsenceManagementPage() {
                               onChange={(e) => setEditTaxonomyName(e.target.value)}
                               onKeyPress={(e) => e.key === 'Enter' && updateTaxonomy(taxonomy.id)}
                             />
-<<<<<<< HEAD
-                            <Button
-                              size="sm"
+                            <Button 
+                            size="sm"
                               onClick={() => updateTaxonomy(taxonomy.id)}
                               className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
-=======
+
                             <Button size="sm" onClick={() => updateTaxonomy(taxonomy.id)}>
->>>>>>> f7adffd45c3ad54aa914480b7817f75112af61a0
+ f7adffd45c3ad54aa914480b7817f75112af61a0
                               <Save className="w-4 h-4" />
                             </Button>
                             <Button
@@ -484,7 +483,7 @@ export function AbsenceManagementPage() {
                       Requiere derivación a profesional de bienestar
                     </Label>
                   </div>
-<<<<<<< HEAD
+
                   {newCategory.requiresProfessional && (
                     <div className="space-y-2">
                       <Label>Correo del Profesional</Label>
@@ -496,13 +495,14 @@ export function AbsenceManagementPage() {
                       />
                     </div>
                   )}
-                  <Button onClick={addCategory} disabled={!newCategory.name || !newCategory.taxonomyId} className="bg-blue-600 hover:bg-blue-700 text-white">
-=======
+                  <Button onClick={addCategory} 
+                  disabled={!newCategory.name || !newCategory.taxonomyId} className="bg-blue-600 hover:bg-blue-700 text-white">
+
                   <Button
                     onClick={addCategory}
                     disabled={!newCategory.name || !newCategory.taxonomyId}
                   >
->>>>>>> f7adffd45c3ad54aa914480b7817f75112af61a0
+ f7adffd45c3ad54aa914480b7817f75112af61a0
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Categoría
                   </Button>
@@ -903,7 +903,7 @@ export function AbsenceManagementPage() {
                     <select
                       className="w-full rounded-md border border-gray-300 p-2"
                       value={newResource.type}
-<<<<<<< HEAD
+HEAD
                       onChange={(e) => {
                         const newType = e.target.value as Resource['type'];
                         setNewResource({ 
@@ -914,11 +914,11 @@ export function AbsenceManagementPage() {
                           fileName: ''
                         });
                       }}
-=======
+
                       onChange={(e) =>
                         setNewResource({ ...newResource, type: e.target.value as Resource['type'] })
                       }
->>>>>>> f7adffd45c3ad54aa914480b7817f75112af61a0
+f7adffd45c3ad54aa914480b7817f75112af61a0
                     >
                       <option value="document">Documento</option>
                       <option value="pdf">PDF</option>
@@ -983,16 +983,15 @@ export function AbsenceManagementPage() {
                       }
                     />
                   </div>
-<<<<<<< HEAD
+HEAD
                   <Button 
                     onClick={addResource} 
                     disabled={!newResource.name || !newResource.actionId || (newResource.type === 'url' ? !newResource.url : !newResource.fileBase64)}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
-=======
-                  <Button
+                   <Button
                     onClick={addResource}
                     disabled={!newResource.name || !newResource.actionId || !newResource.url}
->>>>>>> f7adffd45c3ad54aa914480b7817f75112af61a0
+ f7adffd45c3ad54aa914480b7817f75112af61a0
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar Recurso
