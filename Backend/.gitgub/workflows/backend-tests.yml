@@ -1,0 +1,43 @@
+name: Pipeline de Pruebas - Backend
+
+# El servidor se activará cada vez que hagas un push a la rama main
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-backend-qa:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Copia tu código en el servidor virtual de GitHub
+    - name: Descargar repositorio
+      uses: actions/checkout@v4
+
+    # 2. Instala Node.js en el servidor virtual
+    - name: Configurar entorno de Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+        cache-dependency-path: Backend/package.json
+
+    # 3. Entra a tu carpeta Backend e instala las dependencias de desarrollo (Vitest, etc.)
+    - name: Instalar dependencias del Backend
+      run: |
+        cd Backend
+        npm install
+
+    # 4. Ejecuta las pruebas lógicas que creamos
+    - name: Ejecutar pruebas unitarias
+      run: |
+        cd Backend
+        npm run test
+
+    # 5. Genera el reporte de cobertura del 85% directamente en la nube
+    - name: Validar Cobertura (Coverage)
+      run: |
+        cd Backend
+        npm run test:coverage
