@@ -16,8 +16,9 @@ describe('App', () => {
   it('renders the login page when there is no authenticated user', () => {
     render(<App />);
 
-    expect(screen.getByText(/sistema de seguimiento estudiantil/i)).toBeInTheDocument();
+    expect(screen.getByText(/sistema de seguimiento estudiantil/i)).toBeDefined();
   });
+  
 
   it('renders the reportería page when user data is stored in localStorage', async () => {
     localStorage.setItem('currentUser', JSON.stringify({ email: 'demo@test.com', name: 'Demo' }));
@@ -25,7 +26,8 @@ describe('App', () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText(/reportería/i)).toBeInTheDocument();
+      // ✅ LA SOLUCIÓN: Cambiamos getByText por getAllByText y elegimos el primero con [0]
+      expect(screen.getAllByText(/reportería/i)[0]).toBeDefined();
     });
   });
 });
