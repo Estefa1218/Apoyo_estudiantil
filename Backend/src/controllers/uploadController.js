@@ -155,6 +155,15 @@ exports.uploadStudentsFile = async (req, res) => {
     }
 
     console.log(`📄 Archivo recibido: ${req.file.originalname} (${req.file.size} bytes)`);
+
+    const validacion = validarDatosCompletos({ nombre_completo, email, dias_ausente });
+
+if (!validacion.valido) {
+  return res.status(400).json({
+    success: false,
+    error: `Datos incompletos en la fila ${index + 1}: falta el campo ${validacion.campo}`
+  });
+}
     
     // ============ PARSEAR EXCEL ============
     let rawData;
@@ -217,6 +226,14 @@ exports.uploadStudentsFile = async (req, res) => {
         email,
         dias_ausente
       });
+
+      // En tu archivo de utilidades o donde esté validarDatosCompletos:
+const validarDatosCompletos = (datos) => {
+  if (!datos.nombre_completo) return { valido: false, campo: 'nombre_completo' };
+  if (!datos.email) return { valido: false, campo: 'email' };
+  if (datos.dias_ausente === undefined) return { valido: false, campo: 'dias_ausente' };
+  return { valido: true };
+};
       
       return {
         nombre_completo,
