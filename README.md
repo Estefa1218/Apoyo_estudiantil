@@ -17,11 +17,25 @@ La interfaz fue concebida para ser intuitiva y reducir la carga cognitiva del pe
 
 El sistema se divide en tres componentes principales:
 
-    Frontend (React + Vite): Interfaz de usuario moderna, responsiva y validada para la gestión de reportes y carga de archivos.
+    Frontend (Cliente): Interfaz moderna y responsiva basada en componentes, encargada de la visualización de datos y la interacción del usuario.
 
-    Backend (Express + Node.js): API REST robusta que procesa archivos Excel, gestiona lógica de negocio y automatiza el envío de correos electrónicos.
+    Backend (API REST): El "cerebro" que procesa archivos masivos (Excel/CSV), gestiona la lógica de negocio, calcula ausencias dinámicamente y orquesta el envío de notificaciones.
 
-    Base de Datos (MySQL): Esquema relacional con soporte para transacciones ACID y auditoría completa de eventos.
+    Base de Datos: Estructura relacional optimizada para garantizar la integridad de los datos mediante transacciones ACID y trazabilidad (auditoría) de eventos.
+
+Tecnologías Utilizadas
+
+Para el desarrollo de este ecosistema se emplearon las siguientes tecnologías:
+
+    Frontend: React, Vite, TypeScript, Tailwind CSS, Shadcn UI.
+
+    Backend: Node.js, Express.
+
+    Base de Datos: MySQL.
+
+    Herramientas de Calidad: Vitest (Pruebas unitarias/integración), GitHub Actions (CI/CD).
+
+    Diseño: Prototipado en Figma. https://www.figma.com/make/CNNutMGNkLWjCSO88GrUlO/Sistema-de-Seguimiento-Estudiantil?t=qYfH5MMf6u47fsLZ-0
 
 🌟 Funcionalidades Estrella
 
@@ -32,7 +46,6 @@ El sistema se divide en tres componentes principales:
     Garantía de Datos: Gracias al sistema de transacciones, si un solo dato falla en la carga masiva, el sistema realiza un rollback para mantener la integridad.
 
     Ciclo de Vida del Estudiante: Seguimiento desde que se envía el correo hasta que el estudiante responde o se marca como "no responde".
-
 
 🚀 Funcionalidades Principales
 
@@ -74,6 +87,14 @@ Como parte de un enfoque de ingeniería de software robusto, el sistema maneja:
 
     Logs Detallados: Trazabilidad total de cada evento de carga y envío de correos.
 
+Guía de Instalación y Ejecución Local
+
+Node.js (v18+)
+
+NPM o Yarn
+
+Servidor de base de datos MySQL (con el script sistema_pae.sql ejecutado).
+
 🏁 Instalación Rápida
 
     Clonar repositorio: git clone https://github.com/tu-usuario/sistema-pae.git
@@ -91,3 +112,12 @@ Como parte de un enfoque de ingeniería de software robusto, el sistema maneja:
     cd frontend && npm install
     npm run dev
 
+Funcionalidades Destacadas
+
+    Smart Mapping: Identificación automática de columnas independientemente del nombre del encabezado.
+
+    Cálculo Dinámico: Determinación de días de ausencia basada en la "última conexión" del estudiante.
+
+    Garantía de Integridad: Sistema de Rollback automático ante fallos en carga masiva de datos.
+
+    Ciclo de Vida del Estudiante: Trazabilidad completa desde la detección hasta la resolución del caso.
