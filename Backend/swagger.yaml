@@ -1,0 +1,1029 @@
+openapi: 3.0.3
+info:
+  title: API Sistema PAE
+  version: 1.0.0
+  description: |
+    Documentación OpenAPI del backend del Sistema de Acompañamiento Estudiantil.
+    Las rutas protegidas requieren un token Bearer obtenido en `/api/auth/login`.
+servers:
+  - url: http://localhost:3001
+    description: Servidor local
+tags:
+  - name: Autenticación
+  - name: Cargas
+  - name: Estudiantes
+  - name: Archivos
+  - name: Reportes
+  - name: Derivaciones
+  - name: Recursos
+  - name: Listener de correo
+  - name: Sistema
+paths:
+  /api/auth/login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión
+      description: Valida las credenciales y devuelve un token de acceso.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: profesional@universidad.edu
+                password:
+                  type: string
+                  format: password
+                  example: contraseña
+      responses:
+        '200':
+          description: Sesión iniciada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/Usuario'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/auth/me:
+    get:
+      tags: [Autenticación]
+      summary: Obtener el usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Usuario asociado al token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  user:
+                    $ref: '#/components/schemas/Usuario'
+        '401':
+          $ref: '#/components/responses/Error'
+
+  /api/cargas:
+    get:
+      tags: [Cargas]
+      summary: Listar cargas
+      description: Se puede filtrar por rango si se proporcionan ambas fechas; ambas son opcionales.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/optionalStartDate'
+        - $ref: '#/components/parameters/optionalEndDate'
+      responses:
+        '200':
+          description: Cargas encontradas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  cargas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Carga'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/cargas/{cargaId}/estudiantes:
+    get:
+      tags: [Estudiantes]
+      summary: Listar estudiantes de una carga
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/cargaId'
+      responses:
+        '200':
+          description: Estudiantes de la carga
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  cargaId:
+                    type: integer
+                  estudiantes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EstudianteCarga'
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/cargas/{cargaId}/estudiantes/{estudianteCargaId}:
+    put:
+      tags: [Estudiantes]
+      summary: Actualizar el estado de seguimiento de un estudiante
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/cargaId'
+        - name: estudianteCargaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [estado_seguimiento]
+              properties:
+                estado_seguimiento:
+                  $ref: '#/components/schemas/EstadoSeguimiento'
+                motivo_respuesta:
+                  type: string
+                  nullable: true
+                fecha_respuesta:
+                  type: string
+                  format: date-time
+                  description: Si se omite, se usa la fecha y hora actuales.
+      responses:
+        '200':
+          description: Estado actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  estudianteCargaId:
+                    type: integer
+                  estado_seguimiento:
+                    $ref: '#/components/schemas/EstadoSeguimiento'
+                  motivo_respuesta:
+                    type: string
+                    nullable: true
+                  fecha_respuesta:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/upload:
+    post:
+      tags: [Archivos]
+      summary: Cargar un archivo de estudiantes
+      description: Acepta archivos `.xlsx` o `.xls` de hasta 50 MB. El campo multipart debe llamarse `file`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Archivo procesado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  cargaId:
+                    type: integer
+                  estadisticas:
+                    type: object
+                    properties:
+                      totalArchivo:
+                        type: integer
+                      procesados:
+                        type: integer
+                      ignorados:
+                        type: integer
+                      correos:
+                        type: object
+                        properties:
+                          enviados:
+                            type: integer
+                          fallidos:
+                            type: integer
+                  detalles:
+                    type: object
+                    properties:
+                      archivo:
+                        type: string
+                      columnasDetectadas:
+                        type: object
+                        additionalProperties:
+                          type: string
+                      filasInvalidas:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            fila:
+                              type: integer
+                            errores:
+                              type: array
+                              items:
+                                type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/upload/response:
+    post:
+      tags: [Estudiantes]
+      summary: Registrar manualmente la respuesta de un estudiante
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cargaId, email, motivo_respuesta]
+              properties:
+                cargaId:
+                  type: integer
+                email:
+                  type: string
+                  format: email
+                motivo_respuesta:
+                  type: string
+                fecha_respuesta:
+                  type: string
+                  format: date-time
+                  description: Si se omite, se usa la fecha y hora actuales.
+                estado_seguimiento:
+                  $ref: '#/components/schemas/EstadoSeguimiento'
+                  description: Valor predeterminado `respondido`.
+      responses:
+        '200':
+          description: Respuesta registrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  cargaId:
+                    type: integer
+                  email:
+                    type: string
+                    format: email
+                  estado:
+                    $ref: '#/components/schemas/EstadoSeguimiento'
+                  fecha_respuesta:
+                    type: string
+                    format: date-time
+                  motivo_respuesta:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/upload/status/{cargaId}:
+    get:
+      tags: [Cargas]
+      summary: Consultar el estado y la auditoría de una carga
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/cargaId'
+      responses:
+        '200':
+          description: Estado detallado de la carga
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  carga:
+                    $ref: '#/components/schemas/Carga'
+                  estadisticas:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      pendiente:
+                        type: integer
+                      enviado:
+                        type: integer
+                      respondido:
+                        type: integer
+                      no_responde:
+                        type: integer
+                  auditoria:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/report/stats:
+    get:
+      tags: [Reportes]
+      summary: Obtener estadísticas de seguimiento por rango de fechas
+      description: Las fechas deben estar en formato `DD-MM-YYYY`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/requiredStartDate'
+        - $ref: '#/components/parameters/requiredEndDate'
+      responses:
+        '200':
+          description: Estadísticas del rango indicado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contacted:
+                    type: integer
+                  notContacted:
+                    type: integer
+                  total:
+                    type: integer
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/report:
+    get:
+      tags: [Reportes]
+      summary: Descargar reporte Excel
+      description: Genera un archivo `.xlsx` con hojas para estudiantes respondidos y no contactados.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/requiredStartDate'
+        - $ref: '#/components/parameters/requiredEndDate'
+      responses:
+        '200':
+          description: Archivo Excel generado
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename="reporte_01-01-2026_a_31-01-2026.xlsx"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/derivacion/derivacion:
+    post:
+      tags: [Derivaciones]
+      summary: Asignar un estudiante a un profesional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [estudianteCargaId, cargaId, emailProfesional]
+              properties:
+                estudianteCargaId:
+                  type: integer
+                cargaId:
+                  type: integer
+                emailProfesional:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Derivación agregada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      estudianteCargaId:
+                        type: integer
+                      emailProfesional:
+                        type: string
+                        format: email
+                      fecha_derivacion:
+                        type: string
+                        format: date-time
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/derivacion/derivacion/{estudianteCargaId}/{cargaId}:
+    delete:
+      tags: [Derivaciones]
+      summary: Eliminar la derivación de un estudiante
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: estudianteCargaId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/cargaId'
+      responses:
+        '200':
+          description: Derivación eliminada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/derivacion/derivaciones/{cargaId}:
+    get:
+      tags: [Derivaciones]
+      summary: Listar derivaciones de una carga
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/cargaId'
+      responses:
+        '200':
+          description: Derivaciones encontradas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  cargaId:
+                    type: integer
+                  derivaciones:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/derivacion/recurso:
+    post:
+      tags: [Recursos]
+      summary: Crear un recurso de apoyo
+      description: |
+        Para `tipoRecurso` igual a `PDF`, `DOCUMENTACION` o `PRESENTACION`, adjunte
+        `archivo`. Para `URL`, envíe `archivoUrl` con una URL HTTP o HTTPS.
+        Se aceptan PDF, documentos, hojas de cálculo, presentaciones y TXT, hasta 100 MB.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [estudianteCargaId, tipoRecurso, descripcion]
+              properties:
+                estudianteCargaId:
+                  type: integer
+                tipoRecurso:
+                  type: string
+                  enum: [PDF, DOCUMENTACION, PRESENTACION, URL]
+                descripcion:
+                  type: string
+                archivoUrl:
+                  type: string
+                  format: uri
+                archivo:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Recurso creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/derivacion/recursos/{estudianteCargaId}:
+    get:
+      tags: [Recursos]
+      summary: Listar recursos de un estudiante
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: estudianteCargaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Recursos encontrados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  estudianteCargaId:
+                    type: integer
+                  recursos:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/derivacion/recurso/{recursoId}:
+    put:
+      tags: [Recursos]
+      summary: Actualizar un recurso
+      description: Puede actualizar la descripción y/o reemplazar el archivo por uno nuevo o una URL.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recursoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                descripcion:
+                  type: string
+                archivoUrl:
+                  type: string
+                  format: uri
+                archivo:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Recurso actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      recursoId:
+                        type: integer
+                      descripcion:
+                        type: string
+                      archivo_url:
+                        type: string
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+    delete:
+      tags: [Recursos]
+      summary: Eliminar un recurso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recursoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Recurso eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/derivacion/recurso/descargar/{recursoId}:
+    get:
+      tags: [Recursos]
+      summary: Descargar un recurso o consultar su URL
+      description: Devuelve el archivo local como descarga; para recursos URL devuelve un objeto JSON con la dirección.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recursoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Archivo descargado o URL del recurso
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  type:
+                    type: string
+                    example: url
+                  url:
+                    type: string
+                    format: uri
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/listener/start:
+    post:
+      tags: [Listener de correo]
+      summary: Iniciar la captura automática de respuestas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Listener iniciado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListenerResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/listener/stop:
+    post:
+      tags: [Listener de correo]
+      summary: Detener la captura automática de respuestas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Listener detenido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListenerResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/listener/status:
+    get:
+      tags: [Listener de correo]
+      summary: Consultar el estado de la captura automática
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Estado actual del listener
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  status:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /api/test:
+    get:
+      tags: [Sistema]
+      summary: Verificar conexión con la base de datos
+      security: []
+      responses:
+        '200':
+          description: Conexión a la base de datos disponible
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  database:
+                    type: string
+                  port:
+                    type: integer
+        '500':
+          $ref: '#/components/responses/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    cargaId:
+      name: cargaId
+      in: path
+      required: true
+      schema:
+        type: integer
+    optionalStartDate:
+      name: startDate
+      in: query
+      required: false
+      description: Fecha inicial en formato DD-MM-YYYY o YYYY-MM-DD.
+      schema:
+        type: string
+        example: 01-01-2026
+    optionalEndDate:
+      name: endDate
+      in: query
+      required: false
+      description: Fecha final en formato DD-MM-YYYY o YYYY-MM-DD.
+      schema:
+        type: string
+        example: 31-01-2026
+    requiredStartDate:
+      name: startDate
+      in: query
+      required: true
+      description: Fecha inicial en formato DD-MM-YYYY.
+      schema:
+        type: string
+        example: 01-01-2026
+    requiredEndDate:
+      name: endDate
+      in: query
+      required: true
+      description: Fecha final en formato DD-MM-YYYY.
+      schema:
+        type: string
+        example: 31-01-2026
+  responses:
+    Error:
+      description: Solicitud fallida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: string
+        hint:
+          type: string
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        nombre_completo:
+          type: string
+    EstadoSeguimiento:
+      type: string
+      enum: [pendiente, enviado, respondido, no_responde]
+    Carga:
+      type: object
+      properties:
+        carga_id:
+          type: integer
+        nombre_archivo:
+          type: string
+        total_estudiantes:
+          type: integer
+        correos_enviados:
+          type: integer
+        correos_fallidos:
+          type: integer
+        fecha_carga:
+          type: string
+          format: date-time
+        estado:
+          type: string
+          enum: [procesando, completado, fallido]
+        profesional:
+          type: string
+    EstudianteCarga:
+      type: object
+      properties:
+        estudiante_carga_id:
+          type: integer
+        nombre_completo:
+          type: string
+        email:
+          type: string
+          format: email
+        dias_ausente:
+          type: integer
+        estado_seguimiento:
+          $ref: '#/components/schemas/EstadoSeguimiento'
+        fecha_primer_intento:
+          type: string
+          format: date-time
+          nullable: true
+        intentos_enviados:
+          type: integer
+        fecha_respuesta:
+          type: string
+          format: date-time
+          nullable: true
+        motivo_respuesta:
+          type: string
+          nullable: true
+        fecha_creacion:
+          type: string
+          format: date-time
+        requiere_derivacion:
+          type: boolean
+        email_profesional_derivado:
+          type: string
+          format: email
+          nullable: true
+        fecha_derivacion:
+          type: string
+          format: date-time
+          nullable: true
+    SuccessMessage:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+    ListenerResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        details:
+          type: string
+        status:
+          type: object
+          additionalProperties: true
